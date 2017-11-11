@@ -6,7 +6,7 @@ from multiprocessing import Process, Value
 class Server:
     def __init__(self):
         self.UDP_IP = "0.0.0.0"
-        self.UDP_PORT = 5010
+        self.UDP_PORT = 6969
         print "UDP target IP:", self.UDP_IP
         print "UDP target port:", self.UDP_PORT
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,7 +23,7 @@ class Server:
 def parseCommand(command):
     if command == "l":
         print "Turned left."
-        pyautogui.press('w')
+        pyautogui.press('q')
     elif command == "r":
         print "Turned right"
         pyautogui.press('w')
