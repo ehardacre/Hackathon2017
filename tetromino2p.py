@@ -19,6 +19,16 @@ MOVEDOWNFREQ = .25
 XMARGIN = 50
 TOPMARGIN = XMARGIN
 
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        self.image = pygame.image.load(image_file)
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location
+
+BG = Background('space-background.jpg', [0,0])
+TERTIS = Background('Tertis.png', [WINDOWWIDTH/2,WINDOWHEIGHT/2])
+
 #               R    G    B
 WHITE       = (255, 255, 255)
 GRAY        = (100, 100, 100)
@@ -196,7 +206,7 @@ def main():
     BIGFONT = pygame.font.SysFont('Courier.ttf', 100)
     pygame.display.set_caption('Tetromino')
 
-    showTextScreen('Tetromino')
+    showTextScreen("", 'Waiting for connections...', True)
     while True: # game loop
 #        if random.randint(0, 1) == 0:
 #            pygame.mixer.music.load('tetrisb.mid')
@@ -205,24 +215,35 @@ def main():
 #        pygame.mixer.music.play(-1, 0.0)
         runGame()
 #        pygame.mixer.music.stop()
-        showTextScreen('Game OVER')
+        showTextScreen('Game OVER', 'Both players swipe down to start again', False)
 
 
 def runGame():
     # setup variables for the start of the game
     board = getBlankBoard()
+    board2 = getBlankBoard()
     lastMoveDownTime = time.time()
     lastMoveSidewaysTime = time.time()
     lastFallTime = time.time()
+    lastMoveDownTime2 = time.time()
+    lastMoveSidewaysTime2 = time.time()
+    lastFallTime2 = time.time()
     movingDown = False # note: there is no movingUp variable
     movingLeft = False
     movingRight = False
-    score = 40
+    movingDown2 = False # note: there is no movingUp variable
+    movingLeft2 = False
+    movingRight2 = False
+    score = 10
+    score2 = 10
     level, fallFreq = calculateLevelAndFallFreq(score)
 
     fallingPiece = getNewPiece()
     nextPiece = getNewPiece()
     nextnextPiece = getNewPiece()
+    fallingPiece2 = getNewPiece()
+    nextPiece2 = getNewPiece()
+    nextnextPiece2 = getNewPiece()
 
     while True: # game loop
         if fallingPiece == None:
@@ -234,28 +255,36 @@ def runGame():
 
             if not isValidPosition(board, fallingPiece):
                 return # can't fit a new piece on the board, so game over
+        if fallingPiece2 == None:
+            # No falling piece in play, so start a new piece at the top
+            fallingPiece2 = nextPiece2
+            nextPiece2 = nextnextPiece2
+            nextnextPiece2 = getNewPiece()
+            lastFallTime2 = time.time() # reset lastFallTime
 
+            if not isValidPosition(board2, fallingPiece2):
+                return # can't fit a new piece on the board, so game over
         checkForQuit()
         if mainStart.checkForCommand():
             mainStart.parseCommand(mainStart.character.value)
             mainStart.commandInputted.value = 0
         for event in pygame.event.get(): # event handling loop
-            if event.type == KEYUP:
-                if (event.key == K_p):
-                    # Pausing the game
-                    DISPLAYSURF.fill(BGCOLOR)
-                    showTextScreen('Paused') # pause until a key press
-                    lastFallTime = time.time()
-                    lastMoveDownTime = time.time()
-                    lastMoveSidewaysTime = time.time()
-                elif (event.key == K_LEFT or event.key == K_a):
-                    movingLeft = False
-                elif (event.key == K_RIGHT or event.key == K_d):
-                    movingRight = False
-                elif (event.key == K_DOWN or event.key == K_s):
-                    movingDown = False
+            # if event.type == KEYUP:
+            #     if (event.key == K_p):
+            #         # Pausing the game
+            #         DISPLAYSURF.fill(BGCOLOR)
+            #         showTextScreen('Paused') # pause until a key press
+            #         lastFallTime = time.time()
+            #         lastMoveDownTime = time.time()
+            #         lastMoveSidewaysTime = time.time()
+            #     elif (event.key == K_LEFT or event.key == K_a):
+            #         movingLeft = False
+            #     elif (event.key == K_RIGHT or event.key == K_d):
+            #         movingRight = False
+            #     elif (event.key == K_DOWN or event.key == K_s):
+            #         movingDown = False
 
-            elif event.type == KEYDOWN:
+            if event.type == KEYDOWN:
                 # moving the piece sideways
                 if (event.key == K_LEFT or event.key == K_a) and isValidPosition(board, fallingPiece, adjX=-1):
                     fallingPiece['x'] -= 1
@@ -263,14 +292,26 @@ def runGame():
                     movingRight = False
                     lastMoveSidewaysTime = time.time()
 
+                elif (event.key == K_j) and isValidPosition(board2, fallingPiece2, adjX=-1):
+                    fallingPiece2['x'] -= 1
+                    movingLeft2 = True
+                    movingRight2 = False
+                    lastMoveSidewaysTime2 = time.time()
+
                 elif (event.key == K_RIGHT or event.key == K_d) and isValidPosition(board, fallingPiece, adjX=1):
                     fallingPiece['x'] += 1
                     movingRight = True
                     movingLeft = False
                     lastMoveSidewaysTime = time.time()
 
+                elif (event.key == K_l) and isValidPosition(board2, fallingPiece2, adjX=1):
+                    fallingPiece2['x'] += 1
+                    movingRight2 = True
+                    movingLeft2 = False
+                    lastMoveSidewaysTime2 = time.time()
+
                 # rotating the piece (if there is room to rotate)
-                elif (event.key == K_UP or event.key == K_w):
+                elif (event.key == K_UP or event.key == K_e):
                     fallingPiece['rotation'] = (fallingPiece['rotation'] + 1) % len(PIECES[fallingPiece['shape']])
                     if not isValidPosition(board, fallingPiece):
                         fallingPiece['rotation'] = (fallingPiece['rotation'] - 1) % len(PIECES[fallingPiece['shape']])
@@ -279,15 +320,24 @@ def runGame():
                     if not isValidPosition(board, fallingPiece):
                         fallingPiece['rotation'] = (fallingPiece['rotation'] + 1) % len(PIECES[fallingPiece['shape']])
 
+                elif (event.key == K_o):
+                    fallingPiece2['rotation'] = (fallingPiece2['rotation'] + 1) % len(PIECES[fallingPiece2['shape']])
+                    if not isValidPosition(board2, fallingPiece2):
+                        fallingPiece2['rotation'] = (fallingPiece2['rotation'] - 1) % len(PIECES[fallingPiece2['shape']])
+                elif (event.key == K_u): # rotate the other direction
+                    fallingPiece2['rotation'] = (fallingPiece2['rotation'] - 1) % len(PIECES[fallingPiece2['shape']])
+                    if not isValidPosition(board2, fallingPiece2):
+                        fallingPiece2['rotation'] = (fallingPiece2['rotation'] + 1) % len(PIECES[fallingPiece2['shape']])
+
                 # making the piece fall faster with the down key
-                elif (event.key == K_DOWN or event.key == K_s):
-                    movingDown = True
-                    if isValidPosition(board, fallingPiece, adjY=1):
-                        fallingPiece['y'] += 1
-                    lastMoveDownTime = time.time()
+                # elif (event.key == K_DOWN or event.key == K_s):
+                #     movingDown = True
+                #     if isValidPosition(board, fallingPiece, adjY=1):
+                #         fallingPiece['y'] += 1
+                #     lastMoveDownTime = time.time()
 
                 # move the current piece all the way down
-                elif event.key == K_SPACE:
+                elif event.key == K_w:
                     movingDown = False
                     movingLeft = False
                     movingRight = False
@@ -296,17 +346,26 @@ def runGame():
                             break
                     fallingPiece['y'] += i - 1
 
-        # handle moving the piece because of user input
-        if (movingLeft or movingRight) and time.time() - lastMoveSidewaysTime > MOVESIDEWAYSFREQ:
-            if movingLeft and isValidPosition(board, fallingPiece, adjX=-1):
-                fallingPiece['x'] -= 1
-            elif movingRight and isValidPosition(board, fallingPiece, adjX=1):
-                fallingPiece['x'] += 1
-            lastMoveSidewaysTime = time.time()
+                elif event.key == K_i:
+                    movingDown2 = False
+                    movingLeft2 = False
+                    movingRight2 = False
+                    for i in range(1, BOARDHEIGHT):
+                        if not isValidPosition(board2, fallingPiece2, adjY=i):
+                            break
+                    fallingPiece2['y'] += i - 1
 
-        if movingDown and time.time() - lastMoveDownTime > MOVEDOWNFREQ and isValidPosition(board, fallingPiece, adjY=1):
-            fallingPiece['y'] += 1
-            lastMoveDownTime = time.time()
+        # handle moving the piece because of user input
+        # if (movingLeft or movingRight) and time.time() - lastMoveSidewaysTime > MOVESIDEWAYSFREQ:
+        #     if movingLeft and isValidPosition(board, fallingPiece, adjX=-1):
+        #         fallingPiece['x'] -= 1
+        #     elif movingRight and isValidPosition(board, fallingPiece, adjX=1):
+        #         fallingPiece['x'] += 1
+        #     lastMoveSidewaysTime = time.time()
+        #
+        # if movingDown and time.time() - lastMoveDownTime > MOVEDOWNFREQ and isValidPosition(board, fallingPiece, adjY=1):
+        #     fallingPiece['y'] += 1
+        #     lastMoveDownTime = time.time()
 
         # let the piece fall if it is time to fall
         if time.time() - lastFallTime > fallFreq:
@@ -322,14 +381,32 @@ def runGame():
                 fallingPiece['y'] += 1
                 lastFallTime = time.time()
 
+        if time.time() - lastFallTime2 > fallFreq:
+            # see if the piece has landed
+            if not isValidPosition(board2, fallingPiece2, adjY=1):
+                # falling piece has landed, set it on the board
+                addToBoard(board2, fallingPiece2)
+                score2 -= removeCompleteLines(board2)
+                level, fallFreq = calculateLevelAndFallFreq(score)
+                fallingPiece2 = None
+            else:
+                # piece did not land, just move the piece down
+                fallingPiece2['y'] += 1
+                lastFallTime2 = time.time()
+
         # drawing everything on the screen
-        DISPLAYSURF.fill(BGCOLOR)
+        DISPLAYSURF.fill(WHITE)
+        DISPLAYSURF.blit(BG.image, BG.rect)
         drawBoard(board)
+        drawBoard2(board2)
         drawStatus(score, level)
+        drawStatus2(score2, level)
         drawNextPiece(nextPiece, nextnextPiece)
+        drawNextPiece2(nextPiece2, nextnextPiece2)
         if fallingPiece != None:
             drawPiece(fallingPiece)
-
+        if fallingPiece2 != None:
+            drawPiece2(fallingPiece2)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -357,27 +434,69 @@ def checkForKeyPress():
     return None
 
 
-def showTextScreen(text):
+def showTextScreen(text, subtext, initial):
     # This function displays large text in the
     # center of the screen until a key is pressed.
     # Draw the text drop shadow
-    titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTSHADOWCOLOR)
-    titleRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
-    DISPLAYSURF.blit(titleSurf, titleRect)
+    if(initial):
+        TERTIS.rect.center = (int(WINDOWWIDTH/2), int(WINDOWHEIGHT/2)-50)
+        DISPLAYSURF.blit(TERTIS.image, TERTIS.rect)
+    else:
+        titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTSHADOWCOLOR)
+        titleRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2)+50)
+        DISPLAYSURF.blit(titleSurf, titleRect)
 
-    # Draw the text
-    titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTCOLOR)
-    titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) - 3)
-    DISPLAYSURF.blit(titleSurf, titleRect)
+        # Draw the text
+        titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTCOLOR)
+        titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) - 3)
+        DISPLAYSURF.blit(titleSurf, titleRect)
 
-    # Draw the additional "Press a key to play." text.
-    pressKeySurf, pressKeyRect = makeTextObjs('Press a key to play.', BASICFONT, TEXTCOLOR)
-    pressKeyRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 100)
+    # Draw the additional text.
+    pressKeySurf, pressKeyRect = makeTextObjs(subtext, BASICFONT, TEXTCOLOR)
+    pressKeyRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 130)
     DISPLAYSURF.blit(pressKeySurf, pressKeyRect)
 
-    while checkForKeyPress() == None:
+    # while checkForKeyPress() == None:
+    #     pygame.display.update()
+    #     FPSCLOCK.tick()
+
+    p1Connected = False
+    p2Connected = False
+
+    while not p1Connected or not p2Connected:
+        if mainStart.checkForCommand():
+            mainStart.parseCommand(mainStart.character.value)
+            mainStart.commandInputted.value = 0
+        for event in pygame.event.get():
+            if(initial):
+                if event.type == KEYDOWN:
+                    if event.key == K_1:
+                        p1Connected = True
+                        # Draw the additional "Press a key to play." text.
+                        p1Surf, p1Rect = makeTextObjs('Player 1 connected!', BASICFONT, TEXTCOLOR)
+                        p1Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 160)
+                        DISPLAYSURF.blit(p1Surf, p1Rect)
+                    elif event.key == K_2:
+                        p2Connected = True
+                        p2Surf, p2Rect = makeTextObjs('Player 2 connected!', BASICFONT, TEXTCOLOR)
+                        p2Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 190)
+                        DISPLAYSURF.blit(p2Surf, p2Rect)
+            else:
+                    if event.type == KEYDOWN:
+                        if event.key == K_w:
+                            p1Connected = True
+                            # Draw the additional "Press a key to play." text.
+                            p1Surf, p1Rect = makeTextObjs('Player 1 connected!', BASICFONT, TEXTCOLOR)
+                            p1Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 130)
+                            DISPLAYSURF.blit(p1Surf, p1Rect)
+                        elif event.key == K_i:
+                            p2Connected = True
+                            p2Surf, p2Rect = makeTextObjs('Player 2 connected!', BASICFONT, TEXTCOLOR)
+                            p2Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 160)
+                            DISPLAYSURF.blit(p2Surf, p2Rect)
         pygame.display.update()
         FPSCLOCK.tick()
+
 
 
 def checkForQuit():
@@ -491,6 +610,10 @@ def convertToPixelCoords(boxx, boxy):
     # coordinates of the location on the screen.
     return (XMARGIN + (boxx * BOXSIZE)), (TOPMARGIN + (boxy * BOXSIZE))
 
+def convertToPixelCoords2(boxx, boxy):
+    # Convert the given xy coordinates of the board to xy
+    # coordinates of the location on the screen.
+    return (WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN + (boxx * BOXSIZE)), (TOPMARGIN + (boxy * BOXSIZE))
 
 def drawBox(boxx, boxy, color, pixelx=None, pixely=None):
     # draw a single box (each tetromino piece has four boxes)
@@ -504,6 +627,17 @@ def drawBox(boxx, boxy, color, pixelx=None, pixely=None):
     pygame.draw.rect(DISPLAYSURF, COLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
     pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
 
+def drawBox2(boxx, boxy, color, pixelx=None, pixely=None):
+    # draw a single box (each tetromino piece has four boxes)
+    # at xy coordinates on the board. Or, if pixelx & pixely
+    # are specified, draw to the pixel coordinates stored in
+    # pixelx & pixely (this is used for the "Next" piece).
+    if color == BLANK:
+        return
+    if pixelx == None and pixely == None:
+        pixelx, pixely = convertToPixelCoords2(boxx, boxy)
+    pygame.draw.rect(DISPLAYSURF, COLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
+    pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
 
 def drawBoard(board):
     # draw the border around the board
@@ -520,12 +654,29 @@ def drawBoard(board):
         for y in range(BOARDHEIGHT):
             drawBox(x, y, board[x][y])
 
+def drawBoard2(board):
+    pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN - 3, TOPMARGIN - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, (WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN - 3, TOPMARGIN - 7, BOXSIZE * BOARDWIDTH, BOXSIZE * BOARDHEIGHT))
+    for x in range(BOARDWIDTH):
+    	pygame.draw.line(DISPLAYSURF, GRAY, (x*BOXSIZE + WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN, TOPMARGIN), (x*BOXSIZE + WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN, TOPMARGIN+BOXSIZE*BOARDHEIGHT), 1)
+    for y in range(BOARDHEIGHT):
+    	pygame.draw.line(DISPLAYSURF, GRAY, (WINDOWWIDTH - (BOARDWIDTH * BOXSIZE) - XMARGIN - 3, y*BOXSIZE + TOPMARGIN), (WINDOWWIDTH - XMARGIN, y*BOXSIZE + TOPMARGIN), 1)
+    for x in range(BOARDWIDTH):
+        for y in range(BOARDHEIGHT):
+            drawBox2(x, y, board[x][y])
 
 def drawStatus(score, level):
     # draw the score text
-    scoreSurf = BIGFONT.render('%s' % score, True, GRAY)
+    scoreSurf = BIGFONT.render('%s' % score, True, WHITE)
     scoreRect = scoreSurf.get_rect()
     scoreRect.topleft = (XMARGIN + (BOARDWIDTH * BOXSIZE)/2 - 40, (BOARDHEIGHT * BOXSIZE) + 80)
+    DISPLAYSURF.blit(scoreSurf, scoreRect)
+
+def drawStatus2(score, level):
+    # draw the score text
+    scoreSurf = BIGFONT.render('%s' % score, True, WHITE)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.topleft = (WINDOWWIDTH - XMARGIN - (BOARDWIDTH * BOXSIZE)/2 - 40, (BOARDHEIGHT * BOXSIZE) + 80)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
     # draw the level text
@@ -533,7 +684,6 @@ def drawStatus(score, level):
 #    levelRect = levelSurf.get_rect()
 #    levelRect.topleft = (WINDOWWIDTH - 150, 50)
 #    DISPLAYSURF.blit(levelSurf, levelRect)
-# drawStatus2, drawNextPIece2, drawPiece2
 
 
 def drawPiece(piece, pixelx=None, pixely=None):
@@ -548,6 +698,17 @@ def drawPiece(piece, pixelx=None, pixely=None):
             if shapeToDraw[y][x] != BLANK:
                 drawBox(None, None, piece['color'], pixelx + (x * BOXSIZE), pixely + (y * BOXSIZE))
 
+def drawPiece2(piece, pixelx=None, pixely=None):
+    shapeToDraw = PIECES[piece['shape']][piece['rotation']]
+    if pixelx == None and pixely == None:
+        # if pixelx & pixely hasn't been specified, use the location stored in the piece data structure
+        pixelx, pixely = convertToPixelCoords2(piece['x'], piece['y'])
+
+    # draw each of the boxes that make up the piece
+    for x in range(TEMPLATEWIDTH):
+        for y in range(TEMPLATEHEIGHT):
+            if shapeToDraw[y][x] != BLANK:
+                drawBox2(None, None, piece['color'], pixelx + (x * BOXSIZE), pixely + (y * BOXSIZE))
 
 def drawNextPiece(piece , nextpiece):
 #    # draw the "next" text
@@ -558,6 +719,10 @@ def drawNextPiece(piece , nextpiece):
     # draw the "next" piece
     drawPiece(piece, pixelx=XMARGIN + (BOARDWIDTH * BOXSIZE) + 20, pixely=TOPMARGIN)
     drawPiece(nextpiece, pixelx=XMARGIN + (BOARDWIDTH * BOXSIZE) + 20, pixely=TOPMARGIN + 100)
+
+def drawNextPiece2(piece , nextpiece):
+    drawPiece2(piece, pixelx=WINDOWWIDTH - XMARGIN - (BOARDWIDTH * BOXSIZE) - (5*BOXSIZE), pixely=TOPMARGIN)
+    drawPiece2(nextpiece, pixelx=WINDOWWIDTH - XMARGIN - (BOARDWIDTH * BOXSIZE) - (5*BOXSIZE), pixely=TOPMARGIN + 100)
 
 # if __name__ == '__main__':
 #     main()

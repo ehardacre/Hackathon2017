@@ -21,21 +21,42 @@ class Server:
 
 
 def parseCommand(command):
-    if command == "l":
-        print "Turned left."
+    if command == "q":
+        print "Turned left for P1."
         pyautogui.press('q')
-    elif command == "r":
-        print "Turned right"
-        pyautogui.press('w')
+    elif command == "e":
+        print "Turned right for P1"
+        pyautogui.press('e')
     elif command == "a":
-        print "Moved left."
+        print "Moved left for P1."
         pyautogui.press('a')
     elif command == "d":
-        print "Moved right."
+        print "Moved right for P1."
         pyautogui.press('d')
-    elif command == "s":
-        print "Dropped down."
-        pyautogui.press('space')
+    elif command == "w":
+        print "Dropped down for P1."
+        pyautogui.press('w')
+    elif command == "u":
+        print "Turned left for P2."
+        pyautogui.press('u')
+    elif command == "o":
+        print "Turned right for P2"
+        pyautogui.press('o')
+    elif command == "j":
+        print "Moved left for P2."
+        pyautogui.press('j')
+    elif command == "l":
+        print "Moved right for P2."
+        pyautogui.press('l')
+    elif command == "i":
+        print "Dropped down for P2."
+        pyautogui.press('i')
+    elif command == "1":
+        print "P1 Connected."
+        pyautogui.press('1')
+    elif command == "2":
+        print "P2 Connected."
+        pyautogui.press('2')
     else:
         print "Not recognized."
 
