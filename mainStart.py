@@ -50,8 +50,3 @@ def initServer():
     character = Value('c', "x")
     p = Process(target=server.startServer, args=(character,commandInputted,))
     p.start()
-
-# while True:
-#     if checkForCommand():
-#         parseCommand(character.value)
-#         commandInputted.value = 0
