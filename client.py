@@ -1,8 +1,8 @@
 import socket
 
+
 host = '10.130.6.38'
 port = 5007
-
 Message = "Hello, World"
 
 clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
