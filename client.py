@@ -1,7 +1,7 @@
 import socket
 
-host = '127.0.0.1'
-port = 5005
+host = '10.130.6.38'
+port = 5007
 
 Message = "Hello, World"
 
@@ -11,3 +11,8 @@ clientSock.connect((host,port))
 while True:
     userInput = raw_input("Enter a command: ")
     clientSock.send(userInput.encode('utf-8'))
+
+
+# Kevin's IP information for connecting to his Mac
+# host = '10.130.6.38'
+# port = 5006

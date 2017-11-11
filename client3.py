@@ -2,7 +2,7 @@ import socket
 from time import sleep
 from time import time
 
-host = '134.173.87.133'
+host = '10.130.6.38'
 port = 5809
 def setupSocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
