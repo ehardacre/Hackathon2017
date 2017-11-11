@@ -448,7 +448,7 @@ def showTextScreen(text, subtext, initial):
 
         # Draw the text
         titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTCOLOR)
-        titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) - 3)
+        titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) + 47)
         DISPLAYSURF.blit(titleSurf, titleRect)
 
     # Draw the additional text.
