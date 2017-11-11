@@ -1,5 +1,6 @@
 
-import random, time, pygame, sys, Tkinter
+import random, time, pygame, sys, Tkinter, pyautogui
+import mainStart
 from pygame.locals import *
 
 FPS = 25
@@ -186,6 +187,7 @@ PIECES = {'S': S_SHAPE_TEMPLATE,
 
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT, BIGFONT, INFOFONT
+    mainStart.initServer()
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -234,6 +236,9 @@ def runGame():
                 return # can't fit a new piece on the board, so game over
 
         checkForQuit()
+        if mainStart.checkForCommand():
+            mainStart.parseCommand(mainStart.character.value)
+            mainStart.commandInputted.value = 0
         for event in pygame.event.get(): # event handling loop
             if event.type == KEYUP:
                 if (event.key == K_p):
@@ -327,6 +332,7 @@ def runGame():
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
 
 
 def makeTextObjs(text, font, color):
@@ -552,5 +558,6 @@ def drawNextPiece(piece , nextpiece):
     drawPiece(piece, pixelx=XMARGIN + (BOARDWIDTH * BOXSIZE) + 20, pixely=TOPMARGIN)
     drawPiece(nextpiece, pixelx=XMARGIN + (BOARDWIDTH * BOXSIZE) + 20, pixely=TOPMARGIN + 100)
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
+main()

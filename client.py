@@ -1,8 +1,8 @@
 import socket
 
 
-host = '10.130.6.38'
-port = 5007
+host = '172.20.10.3'
+port = 5009
 Message = "Hello, World"
 
 clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
