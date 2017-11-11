@@ -1,8 +1,9 @@
 import socket
 
-
 host = '192.168.43.58'
 port = 5010
+
+Message = "Hello, World"
 
 clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 clientSock.connect((host,port))
