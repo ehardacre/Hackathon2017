@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>Pods-rotation.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-rotationTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-rotationUITests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>SwiftSocket.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>37CC40F53E1B9FBFCD3627D230FC36DB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>7CE7352A23333CCF5853CF0E68EE6865</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>9D872D2F480564721CD679C6507431EB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A3FF8C76989216700ED89B5B264B53B9</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
