@@ -19,6 +19,16 @@ MOVEDOWNFREQ = .25
 XMARGIN = 50
 TOPMARGIN = XMARGIN
 
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        self.image = pygame.image.load(image_file)
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location
+
+BG = Background('space-background.jpg', [0,0])
+TERTIS = Background('Tertis.png', [WINDOWWIDTH/2,WINDOWHEIGHT/2])
+
 #               R    G    B
 WHITE       = (255, 255, 255)
 GRAY        = (100, 100, 100)
@@ -196,7 +206,7 @@ def main():
     BIGFONT = pygame.font.SysFont('Courier.ttf', 100)
     pygame.display.set_caption('Tetromino')
 
-    showTextScreen('Tetromino')
+    showTextScreen("", 'Waiting for connections...', True)
     while True: # game loop
 #        if random.randint(0, 1) == 0:
 #            pygame.mixer.music.load('tetrisb.mid')
@@ -205,7 +215,7 @@ def main():
 #        pygame.mixer.music.play(-1, 0.0)
         runGame()
 #        pygame.mixer.music.stop()
-        showTextScreen('Game OVER')
+        showTextScreen('Game OVER', 'Both players swipe down to start again', False)
 
 
 def runGame():
@@ -224,8 +234,8 @@ def runGame():
     movingDown2 = False # note: there is no movingUp variable
     movingLeft2 = False
     movingRight2 = False
-    score = 40
-    score2 = 40
+    score = 10
+    score2 = 10
     level, fallFreq = calculateLevelAndFallFreq(score)
 
     fallingPiece = getNewPiece()
@@ -385,7 +395,8 @@ def runGame():
                 lastFallTime2 = time.time()
 
         # drawing everything on the screen
-        DISPLAYSURF.fill(BGCOLOR)
+        DISPLAYSURF.fill(WHITE)
+        DISPLAYSURF.blit(BG.image, BG.rect)
         drawBoard(board)
         drawBoard2(board2)
         drawStatus(score, level)
@@ -423,22 +434,26 @@ def checkForKeyPress():
     return None
 
 
-def showTextScreen(text):
+def showTextScreen(text, subtext, initial):
     # This function displays large text in the
     # center of the screen until a key is pressed.
     # Draw the text drop shadow
-    titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTSHADOWCOLOR)
-    titleRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
-    DISPLAYSURF.blit(titleSurf, titleRect)
+    if(initial):
+        TERTIS.rect.center = (int(WINDOWWIDTH/2), int(WINDOWHEIGHT/2)-50)
+        DISPLAYSURF.blit(TERTIS.image, TERTIS.rect)
+    else:
+        titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTSHADOWCOLOR)
+        titleRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2)+50)
+        DISPLAYSURF.blit(titleSurf, titleRect)
 
-    # Draw the text
-    titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTCOLOR)
-    titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) - 3)
-    DISPLAYSURF.blit(titleSurf, titleRect)
+        # Draw the text
+        titleSurf, titleRect = makeTextObjs(text, BIGFONT, TEXTCOLOR)
+        titleRect.center = (int(WINDOWWIDTH / 2) - 3, int(WINDOWHEIGHT / 2) - 3)
+        DISPLAYSURF.blit(titleSurf, titleRect)
 
-    # Draw the additional "Press a key to play." text.
-    pressKeySurf, pressKeyRect = makeTextObjs('Waiting for connections...', BASICFONT, TEXTCOLOR)
-    pressKeyRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 100)
+    # Draw the additional text.
+    pressKeySurf, pressKeyRect = makeTextObjs(subtext, BASICFONT, TEXTCOLOR)
+    pressKeyRect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 130)
     DISPLAYSURF.blit(pressKeySurf, pressKeyRect)
 
     # while checkForKeyPress() == None:
@@ -453,18 +468,32 @@ def showTextScreen(text):
             mainStart.parseCommand(mainStart.character.value)
             mainStart.commandInputted.value = 0
         for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_1:
-                    p1Connected = True
-                    # Draw the additional "Press a key to play." text.
-                    p1Surf, p1Rect = makeTextObjs('Player 1 connected!', BASICFONT, TEXTCOLOR)
-                    p1Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 130)
-                    DISPLAYSURF.blit(p1Surf, p1Rect)
-                elif event.key == K_2:
-                    p2Connected = True
-                    p2Surf, p2Rect = makeTextObjs('Player 2 connected!', BASICFONT, TEXTCOLOR)
-                    p2Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 160)
-                    DISPLAYSURF.blit(p2Surf, p2Rect)
+            if(initial):
+                if event.type == KEYDOWN:
+                    if event.key == K_1:
+                        p1Connected = True
+                        # Draw the additional "Press a key to play." text.
+                        p1Surf, p1Rect = makeTextObjs('Player 1 connected!', BASICFONT, TEXTCOLOR)
+                        p1Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 160)
+                        DISPLAYSURF.blit(p1Surf, p1Rect)
+                    elif event.key == K_2:
+                        p2Connected = True
+                        p2Surf, p2Rect = makeTextObjs('Player 2 connected!', BASICFONT, TEXTCOLOR)
+                        p2Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 190)
+                        DISPLAYSURF.blit(p2Surf, p2Rect)
+            else:
+                    if event.type == KEYDOWN:
+                        if event.key == K_w:
+                            p1Connected = True
+                            # Draw the additional "Press a key to play." text.
+                            p1Surf, p1Rect = makeTextObjs('Player 1 connected!', BASICFONT, TEXTCOLOR)
+                            p1Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 130)
+                            DISPLAYSURF.blit(p1Surf, p1Rect)
+                        elif event.key == K_i:
+                            p2Connected = True
+                            p2Surf, p2Rect = makeTextObjs('Player 2 connected!', BASICFONT, TEXTCOLOR)
+                            p2Rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2) + 160)
+                            DISPLAYSURF.blit(p2Surf, p2Rect)
         pygame.display.update()
         FPSCLOCK.tick()
 
@@ -638,14 +667,14 @@ def drawBoard2(board):
 
 def drawStatus(score, level):
     # draw the score text
-    scoreSurf = BIGFONT.render('%s' % score, True, GRAY)
+    scoreSurf = BIGFONT.render('%s' % score, True, WHITE)
     scoreRect = scoreSurf.get_rect()
     scoreRect.topleft = (XMARGIN + (BOARDWIDTH * BOXSIZE)/2 - 40, (BOARDHEIGHT * BOXSIZE) + 80)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
 def drawStatus2(score, level):
     # draw the score text
-    scoreSurf = BIGFONT.render('%s' % score, True, GRAY)
+    scoreSurf = BIGFONT.render('%s' % score, True, WHITE)
     scoreRect = scoreSurf.get_rect()
     scoreRect.topleft = (WINDOWWIDTH - XMARGIN - (BOARDWIDTH * BOXSIZE)/2 - 40, (BOARDHEIGHT * BOXSIZE) + 80)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
